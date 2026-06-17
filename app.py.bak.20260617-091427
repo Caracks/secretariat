@@ -1,0 +1,99 @@
+import json
+from dataclasses import dataclass
+from typing import Any
+from flask import Flask, jsonify, request
+
+@dataclass
+class WhatsAppEvent:
+    chat_id: str | None
+    body: str | None
+    sender: str | None
+    raw: dict[str, Any]
+
+class EvolutionPayloadParser:
+    def parse(self, payload: dict[str, Any]) -> list[WhatsAppEvent]:
+        data = payload.get("data")
+
+        if isinstance(data, list):
+            raw_events = data
+        elif isinstance(data, dict):
+            raw_events = [data]
+        else:
+            raw_events = [payload]
+
+       	events = []
+       	for event in raw_events:
+          if not isinstance(event, dict):
+            continue
+          parsed = self._to_event(event)
+          if parsed is not None:
+            events.append(parsed)
+       	return events
+
+    def _to_event(self, event: dict[str, Any]) -> WhatsAppEvent:
+       key = event.get("key") or {}
+
+       if key.get("fromMe") is True:
+         return None
+
+       message = event.get("message") or {}
+
+       return WhatsAppEvent(
+            chat_id=event.get("chatId") or event.get("remoteJid") or key.get("remoteJid"),
+            body=event.get("body") or message.get("conversation"),
+            sender=event.get("from") or event.get("sender") or event.get("pushName"),
+            raw=event,
+        )
+
+class WhatsAppEventLogger:
+    def log(self, event: WhatsAppEvent) -> None:
+        print("\n==========================================", flush=True)
+        print("      NOVA MENSAGEM DETETADA!             ", flush=True)
+        print("==========================================", flush=True)
+        print(f"Conteúdo: {event.body}", flush=True)
+        print(f"Chat/Grupo ID: {event.chat_id}", flush=True)
+        print(f"Remetente: {event.sender}", flush=True)
+
+class WebhookController:
+    def __init__(self, parser: EvolutionPayloadParser, logger: WhatsAppEventLogger):
+        self.parser = parser
+        self.logger = logger
+
+    def handle(self):
+        payload = request.get_json(silent=True) or {}
+        event_type = payload.get("event")
+
+        print(f"Webhook Hit - event={event_type}", flush=True)
+
+        if event_type != "messages.upsert":
+          return jsonify({
+		"status":"ignored",
+		"event": event_type
+		}),200
+
+        events = self.parser.parse(payload)
+        for event in events:
+          self.logger.log(event)
+
+        return jsonify({"status": "received", "events": len(events)}), 200
+
+def create_app() -> Flask:
+    app = Flask(__name__)
+    parser = EvolutionPayloadParser()
+    logger = WhatsAppEventLogger()
+    controller = WebhookController(parser, logger)
+
+    app.add_url_rule(
+        "/webhook",
+        view_func=controller.handle,
+        methods=["POST"],
+    )
+
+    return app
+
+
+app = create_app()
+
+if __name__ == "__main__":
+    print("Servidor Flask a arrancar na porta 5000...", flush=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
