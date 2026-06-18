@@ -1,10 +1,11 @@
-from core.pattern_loader import load_task_keywords
+from core.pattern_loader import load_task_keywords, load_task_done
 
 def route_message(message):
     text = (message.get("text") or "").lower()
     task_keywords = load_task_keywords()
+    done_keywords = load_task_done()
 
-    if any(keyword in text for keyword in task_keywords):
+    if any(keyword in text for keyword in task_keywords + done_keywords):
         return {
             "agent": "dario",
             "confidence": 0.95,
