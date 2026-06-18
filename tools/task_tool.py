@@ -27,7 +27,6 @@ def create_task_from_text(text, sender_name=None):
 
     return task_id
 
-
 def get_open_tasks_text():
     tasks = list_open_tasks()
 
@@ -36,10 +35,7 @@ def get_open_tasks_text():
 
     lines = ["Pendentes:"]
 
-    for task in tasks:
-        task_id = task["id"]
-        title = task["title"]
-
+    for task_id, title in tasks:
         lines.append(f"#{task_id} {title}")
 
     return "\n".join(lines)
