@@ -11,7 +11,7 @@ def load_task_patterns():
     return {
         "keywords": data.get("keywords", []),
         "prefixes": data.get("prefixes", []),
-        "done": data.get("done", [])
+        "done_keywords": data.get("done_keywords", [])
     }
 
 def load_task_keywords():
@@ -20,5 +20,5 @@ def load_task_keywords():
 def load_task_prefixes():
     return load_task_patterns()["prefixes"]
 
-def load_task_done():
-    return load_task_patterns()["done"]
+def load_done_keywords():
+    return load_task_patterns().get("done_keywords", [])

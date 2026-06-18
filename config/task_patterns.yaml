@@ -27,7 +27,7 @@ prefixes:
   - preciso de
   - devemos
   
-done:
+done_keywords:
   - feito
   - concluído
   - concluido
