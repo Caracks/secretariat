@@ -1,22 +1,14 @@
-from core.database import create_task, list_open_tasks
-
-TASK_PREFIXES = [
-    "tenho um pendente para",
-    "tenho um pendente de",
-    "pendente para",
-    "pendente de",
-    "lembrar de",
-    "lembrar para",
-    "não esquecer de",
-    "nao esquecer de",
-]
+from core.database import create_task
+from core.pattern_loader import load_task_prefixes
 
 
 def normalize_task_text(text):
     clean_text = (text or "").strip()
     lower_text = clean_text.lower()
 
-    for prefix in TASK_PREFIXES:
+    task_prefixes = load_task_prefixes()
+
+    for prefix in task_prefixes:
         if lower_text.startswith(prefix):
             return clean_text[len(prefix) :].strip()
 
@@ -34,17 +26,3 @@ def create_task_from_text(text, sender_name=None):
     )
 
     return task_id
-
-
-def get_open_tasks_text():
-    tasks = list_open_tasks()
-
-    if not tasks:
-        return "Não tens pendentes em aberto."
-
-    lines = ["Pendentes:"]
-
-    for task_id, title in tasks:
-        lines.append(f"#{task_id} {title}")
-
-    return "\n".join(lines)

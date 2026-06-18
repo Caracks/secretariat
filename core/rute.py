@@ -1,20 +1,10 @@
-TASK_KEYWORDS = [
-    "pendente",
-    "pendentes",
-    "lembrar",
-    "comprar",
-    "fazer",
-    "não esquecer",
-    "nao esquecer",
-    "tarefas",
-    "por fazer"
-]
-
+from core.pattern_loader import load_task_keywords
 
 def route_message(message):
     text = (message.get("text") or "").lower()
+    task_keywords = load_task_keywords()
 
-    if any(keyword in text for keyword in TASK_KEYWORDS):
+    if any(keyword in text for keyword in task_keywords):
         return {
             "agent": "dario",
             "confidence": 0.95,
