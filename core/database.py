@@ -193,7 +193,7 @@ def create_task(title, created_by=None, raw_text=None, normalized_text=None):
             "open",
             "whatsapp",
             raw_text,
-            normalized_text
+            normalized_text,
             created_by,
             utc_now()
         ))
