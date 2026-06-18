@@ -1,4 +1,4 @@
-from core.database import create_task
+from core.database import create_task, list_open_tasks
 from core.pattern_loader import load_task_prefixes
 
 
@@ -26,3 +26,20 @@ def create_task_from_text(text, sender_name=None):
     )
 
     return task_id
+
+
+def get_open_tasks_text():
+    tasks = list_open_tasks()
+
+    if not tasks:
+        return "Não tens pendentes em aberto."
+
+    lines = ["Pendentes:"]
+
+    for task in tasks:
+        task_id = task["id"]
+        title = task["title"]
+
+        lines.append(f"#{task_id} {title}")
+
+    return "\n".join(lines)

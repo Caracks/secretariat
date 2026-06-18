@@ -21,5 +21,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+python -c "from app import app; print('app import ok')"
+
 Write-Host ""
 Write-Host "All checks passed."

@@ -1,22 +1,15 @@
+from core.pattern_loader import load_task_prefixes
 from tools.task_tool import (
     create_task_from_text,
     normalize_task_text,
-    get_open_tasks_text,
+    get_open_tasks_text
 )
 
-
-LIST_TASK_KEYWORDS = [
-    "pendentes",
-    "o que tenho por fazer",
-    "tarefas em aberto",
-    "lista de tarefas",
-]
-
-
 def is_list_request(text):
+    prefixes = load_task_prefixes()
     clean_text = (text or "").lower()
 
-    return any(keyword in clean_text for keyword in LIST_TASK_KEYWORDS)
+    return any(keyword in clean_text for keyword in prefixes)
 
 
 def run(message):
