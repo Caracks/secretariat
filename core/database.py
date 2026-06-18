@@ -175,32 +175,6 @@ def save_outbound_message(related_message_id, group_id, text, status_code, respo
             utc_now()
         ))
         conn.commit()
-def create_task(title, created_by=None, raw_text=None, normalized_text=None):
-    with db_connect() as conn:
-        cursor = conn.execute("""
-            INSERT INTO tasks (
-                title,
-                status,
-                source,
-                raw_text,
-                normalized_text,
-                created_by,
-                created_at
-            )
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            title,
-            "open",
-            "whatsapp",
-            raw_text,
-            normalized_text,
-            created_by,
-            utc_now()
-        ))
-
-        conn.commit()
-        return cursor.lastrowid
-
 
 def list_open_tasks():
     with db_connect() as conn:
