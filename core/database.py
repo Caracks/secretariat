@@ -200,15 +200,40 @@ def list_open_tasks():
 
     return rows
 
-
 def complete_task(task_id):
     with db_connect() as conn:
-        conn.execute(
-            """
+        row = conn.execute("""
+            SELECT id, title, status
+            FROM tasks
+            WHERE id = ?
+        """, (task_id,)).fetchone()
+
+        if row is None:
+            return {
+                "success": False,
+                "reason": "not_found",
+                "message": f"Não encontrei o pendente #{task_id}."
+            }
+
+        existing_id, title, status = row
+
+        if status != "open":
+            return {
+                "success": False,
+                "reason": "already_closed",
+                "message": f"O pendente #{task_id} já não está em aberto."
+            }
+
+        conn.execute("""
             UPDATE tasks
             SET status = 'completed'
-            WHERE id = ? AND status = 'open'
-        """,
-            (task_id,),
-        )
+            WHERE id = ?
+        """, (task_id,))
+
         conn.commit()
+
+        return {
+            "success": True,
+            "reason": "completed",
+            "message": f"Pendente #{task_id} concluído: {title}"
+        }
