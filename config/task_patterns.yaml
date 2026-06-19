@@ -1,0 +1,51 @@
+keywords:
+  - pendente
+  - pendentes
+  - lembrar
+  - comprar
+  - fazer
+  - não esquecer
+  - nao esquecer
+  - tarefas
+  - por fazer
+  - temos de
+  - tenho de
+  - preciso de
+  - devemos
+  - feito
+  - concluído
+  - concluido
+  - done
+  - terminado
+  - pronto
+
+list_keywords:
+  - pendentes
+  - meus pendentes
+  - quais são os meus pendentes
+  - quais sao os meus pendentes
+  - o que tenho por fazer
+  - tarefas em aberto
+  - lista de tarefas
+
+prefixes:
+  - tenho um pendente para
+  - tenho um pendente de
+  - pendente para
+  - pendente de
+  - lembrar de
+  - lembrar para
+  - não esquecer de
+  - nao esquecer de
+  - temos de
+  - tenho de
+  - preciso de
+  - devemos
+  
+done_keywords:
+  - feito
+  - concluído
+  - concluido
+  - done
+  - terminado
+  - pronto

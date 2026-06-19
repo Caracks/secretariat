@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from core.config import DB_PATH
 
+
 def utc_now():
     return datetime.now(timezone.utc).isoformat()
 
@@ -70,16 +71,18 @@ def init_db():
 def is_duplicate(message_id: str) -> bool:
     with db_connect() as conn:
         row = conn.execute(
-            "SELECT 1 FROM messages WHERE message_id = ? LIMIT 1",
-            (message_id,)
+            "SELECT 1 FROM messages WHERE message_id = ? LIMIT 1", (message_id,)
         ).fetchone()
 
     return row is not None
 
 
-def save_inbound_message(message_id, group_id, sender_id, sender_name, text, raw_payload):
+def save_inbound_message(
+    message_id, group_id, sender_id, sender_name, text, raw_payload
+):
     with db_connect() as conn:
-        conn.execute("""
+        conn.execute(
+            """
             INSERT OR IGNORE INTO messages (
                 message_id,
                 source,
@@ -92,23 +95,26 @@ def save_inbound_message(message_id, group_id, sender_id, sender_name, text, raw
                 created_at
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            message_id,
-            "whatsapp",
-            group_id,
-            sender_id,
-            sender_name,
-            "inbound",
-            text,
-            json.dumps(raw_payload, ensure_ascii=False),
-            utc_now()
-        ))
+        """,
+            (
+                message_id,
+                "whatsapp",
+                group_id,
+                sender_id,
+                sender_name,
+                "inbound",
+                text,
+                json.dumps(raw_payload, ensure_ascii=False),
+                utc_now(),
+            ),
+        )
         conn.commit()
 
 
 def save_webhook_event(event, ignored, reason, raw_payload):
     with db_connect() as conn:
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO webhook_events (
                 event,
                 ignored,
@@ -117,19 +123,22 @@ def save_webhook_event(event, ignored, reason, raw_payload):
                 created_at
             )
             VALUES (?, ?, ?, ?, ?)
-        """, (
-            event,
-            1 if ignored else 0,
-            reason,
-            json.dumps(raw_payload, ensure_ascii=False),
-            utc_now()
-        ))
+        """,
+            (
+                event,
+                1 if ignored else 0,
+                reason,
+                json.dumps(raw_payload, ensure_ascii=False),
+                utc_now(),
+            ),
+        )
         conn.commit()
 
 
 def create_task(title, created_by=None, raw_text=None, normalized_text=None):
     with db_connect() as conn:
-        cursor = conn.execute("""
+        cursor = conn.execute(
+            """
             INSERT INTO tasks (
                 title,
                 status,
@@ -140,23 +149,29 @@ def create_task(title, created_by=None, raw_text=None, normalized_text=None):
                 created_at
             )
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            title,
-            "open",
-            "whatsapp",
-            created_by,
-            raw_text,
-            normalized_text,
-            utc_now()
-        ))
+        """,
+            (
+                title,
+                "open",
+                "whatsapp",
+                created_by,
+                raw_text,
+                normalized_text,
+                utc_now(),
+            ),
+        )
 
         conn.commit()
 
         return cursor.lastrowid
 
-def save_outbound_message(related_message_id, group_id, text, status_code, response_body):
+
+def save_outbound_message(
+    related_message_id, group_id, text, status_code, response_body
+):
     with db_connect() as conn:
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO outbound_messages (
                 related_message_id,
                 group_id,
@@ -166,40 +181,10 @@ def save_outbound_message(related_message_id, group_id, text, status_code, respo
                 created_at
             )
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            related_message_id,
-            group_id,
-            text,
-            status_code,
-            response_body,
-            utc_now()
-        ))
+        """,
+            (related_message_id, group_id, text, status_code, response_body, utc_now()),
+        )
         conn.commit()
-def create_task(title, created_by=None, raw_text=None, normalized_text=None):
-    with db_connect() as conn:
-        cursor = conn.execute("""
-            INSERT INTO tasks (
-                title,
-                status,
-                source,
-                raw_text,
-                normalized_text,
-                created_by,
-                created_at
-            )
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            title,
-            "open",
-            "whatsapp",
-            raw_text,
-            normalized_text,
-            created_by,
-            utc_now()
-        ))
-
-        conn.commit()
-        return cursor.lastrowid
 
 
 def list_open_tasks():
@@ -214,3 +199,41 @@ def list_open_tasks():
         """).fetchall()
 
     return rows
+
+def complete_task(task_id):
+    with db_connect() as conn:
+        row = conn.execute("""
+            SELECT id, title, status
+            FROM tasks
+            WHERE id = ?
+        """, (task_id,)).fetchone()
+
+        if row is None:
+            return {
+                "success": False,
+                "reason": "not_found",
+                "message": f"Não encontrei o pendente #{task_id}."
+            }
+
+        existing_id, title, status = row
+
+        if status != "open":
+            return {
+                "success": False,
+                "reason": "already_closed",
+                "message": f"O pendente #{task_id} já não está em aberto."
+            }
+
+        conn.execute("""
+            UPDATE tasks
+            SET status = 'completed'
+            WHERE id = ?
+        """, (task_id,))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "reason": "completed",
+            "message": f"Pendente #{task_id} concluído: {title}"
+        }
