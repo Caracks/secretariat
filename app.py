@@ -104,10 +104,11 @@ def webhook():
         if not message["group_id"] or not message["text"]:
             continue
 
-        agent = registry.get(route_message["agent"])
+        route = route_message(message)
+        agent = registry.get(route["agent"])
 
         if agent is None:
-            log("No Agent found:", route_message["agent"])
+            log("No Agent found:", route["agent"])
             continue
 
         agent_result = agent["run"](message)
