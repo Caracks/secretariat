@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 .env
+.env.*
 storage/*.db
 storage/*.sqlite
 .vscode/

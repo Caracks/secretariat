@@ -65,6 +65,21 @@ def init_db():
             )
         """)
 
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS task_candidates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_message_id TEXT,
+                source_chat_id TEXT,
+                source_sender_name TEXT,
+                raw_text TEXT NOT NULL,
+                normalized_text TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending_confirmation',
+                created_at TEXT NOT NULL,
+                resolved_at TEXT,
+                resolved_by TEXT
+            )
+        """)
+
         conn.commit()
 
 
@@ -212,3 +227,61 @@ def complete_task(task_id):
             (task_id,),
         )
         conn.commit()
+
+def create_task_candidate(
+    source_message_id,
+    source_chat_id,
+    source_sender_name,
+    raw_text,
+    normalized_text,
+):
+    with db_connect() as conn:
+        cursor = conn.execute("""
+            INSERT INTO task_candidates (
+                source_message_id,
+                source_chat_id,
+                source_sender_name,
+                raw_text,
+                normalized_text,
+                status,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            source_message_id,
+            source_chat_id,
+            source_sender_name,
+            raw_text,
+            normalized_text,
+            "pending_confirmation",
+            utc_now()
+        ))
+
+        conn.commit()
+        return cursor.lastrowid
+
+
+def get_task_candidate(candidate_id):
+    with db_connect() as conn:
+        return conn.execute("""
+            SELECT id, normalized_text, status, source_sender_name
+            FROM task_candidates
+            WHERE id = ?
+        """, (candidate_id,)).fetchone()
+
+
+def update_task_candidate_status(candidate_id, status, resolved_by=None):
+    with db_connect() as conn:
+        cursor = conn.execute("""
+            UPDATE task_candidates
+            SET status = ?, resolved_at = ?, resolved_by = ?
+            WHERE id = ?
+        """, (
+            status,
+            utc_now(),
+            resolved_by,
+            candidate_id
+        ))
+
+        conn.commit()
+        return cursor.rowcount > 0
