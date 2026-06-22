@@ -41,7 +41,7 @@ prefixes:
   - tenho de
   - preciso de
   - devemos
-  
+
 done_keywords:
   - feito
   - concluído
@@ -49,3 +49,23 @@ done_keywords:
   - done
   - terminado
   - pronto
+
+confirm_keywords:
+  - sim
+  - ya
+  - yes
+  - yup
+  - claro
+  - confirma
+  - confirmar
+  - confirmado
+
+reject_keywords:
+  - não
+  - nao
+  - nop
+  - nope
+  - no
+  - rejeita
+  - rejeitar
+  - rejeitado

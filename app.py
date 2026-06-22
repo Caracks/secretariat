@@ -13,8 +13,8 @@ from core.config import (
     APP_HOST,
     APP_PORT,
     AUTHORIZED_GROUP_ID,
-    PRIVATE_CONTACT_AUTO_REPLY,
     WRONG_CONTACT_AUTO_REPLY,
+
 )
 from core.database import (
     init_db,

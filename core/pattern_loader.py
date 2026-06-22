@@ -1,28 +1,30 @@
+from enum import Enum
+from functools import lru_cache
 from pathlib import Path
 import yaml
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TASK_PATTERNS_PATH = BASE_DIR / "config" / "task_patterns.yaml"
 
-def load_task_patterns():
+
+class TaskField(str, Enum):
+    keywords = "keywords"
+    prefixes = "prefixes"
+    done_keywords = "done_keywords"
+    list_keywords = "list_keywords"
+    confirm_keywords = "confirm_keywords"
+    reject_keywords = "reject_keywords"
+
+@lru_cache(maxsize=1)
+def _load_yaml_file() -> dict:
+    if not TASK_PATTERNS_PATH.exists():
+        return {}
     with TASK_PATTERNS_PATH.open("r", encoding="utf-8") as file:
-        data = yaml.safe_load(file) or {}
+        return yaml.safe_load(file) or {}
 
-    return {
-        "keywords": data.get("keywords", []),
-        "prefixes": data.get("prefixes", []),
-        "done_keywords": data.get("done_keywords", []),
-        "list_keywords": data.get("list_keywords", [])
-    }
+def get_task_field(field: TaskField) -> list:
+    data = _load_yaml_file()
+    return data.get(field, [])
 
-def load_task_keywords():
-    return load_task_patterns()["keywords"]
-
-def load_task_prefixes():
-    return load_task_patterns()["prefixes"]
-
-def load_done_keywords():
-    return load_task_patterns().get("done_keywords", [])
-
-def load_list_keywords():
-    return load_task_patterns().get("list_keywords", [])
+def clear_patterns_cache():
+    _load_yaml_file.cache_clear()

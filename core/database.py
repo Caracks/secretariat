@@ -89,6 +89,23 @@ def init_db():
             )
         """)
 
+        (
+            conn.execute("""
+            CREATE TABLE IF NOT EXISTS task_candidates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_message_id TEXT,
+                source_chat_id TEXT,
+                source_sender_name TEXT,
+                raw_text TEXT NOT NULL,
+                normalized_text TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending_confirmation',
+                created_at TEXT NOT NULL,
+                resolved_at TEXT,
+                resolved_by TEXT
+            )
+                     """),
+        )
+
         conn.commit()
 
 
@@ -317,19 +334,17 @@ def update_task_candidate_status(candidate_id, status, resolved_by=None):
         cursor = conn.execute(
             """
             UPDATE task_candidates
-            SET status = ?, resolved_at = ?, resolved_by = ?
+            SET status = ?,
+                resolved_at = ?,
+                resolved_by = ?
             WHERE id = ?
+              AND status = 'pending_confirmation'
         """,
             (status, utc_now(), resolved_by, candidate_id),
         )
 
         conn.commit()
         return cursor.rowcount > 0
-        return {
-            "success": True,
-            "reason": "completed",
-            "message": f"Pendente #{task_id} concluído: {title}",
-        }
 
 
 def is_chat_blocked(chat_id):

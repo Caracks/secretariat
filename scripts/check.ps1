@@ -1,39 +1,22 @@
-Write-Host ""
-Write-Host "=== Secretariat Checks ==="
-Write-Host ""
-
 Write-Host "Running tests..."
 python -m pytest
-
 if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "Tests failed."
+    Write-Host "`nTests failed."
     exit 1
 }
 
-Write-Host ""
-Write-Host "Compiling Python files..."
+Write-Host "`nCompiling Python files..."
 python -m compileall .
-
 if ($LASTEXITCODE -ne 0) {
-    Write-Host ""
-    Write-Host "Compilation failed."
+    Write-Host "`nCompilation failed."
     exit 1
 }
 
+Write-Host "`nValidating app import..."
 python -c "from app import app; print('app import ok')"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`nImport validation failed."
+    exit 1
+}
 
-Write-Host "Running tests..."
-python -m pytest
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-Write-Host "Compiling..."
-python -m compileall .
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-Write-Host "Validating app import..."
-python -c "from app import app; print('app import ok')"
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-Write-Host ""
-Write-Host "All checks passed."
+Write-Host "`nAll checks passed."
