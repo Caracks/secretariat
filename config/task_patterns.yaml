@@ -53,7 +53,7 @@ done_keywords:
 confirm_keywords:
   - sim
   - ya
-  - yes
+  - "yes"
   - yup
   - claro
   - confirma
@@ -75,7 +75,7 @@ reject_keywords:
   - nao
   - nop
   - nope
-  - no
+  - "no"
   - rejeita
   - rejeitar
   - rejeitado

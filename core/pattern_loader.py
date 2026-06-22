@@ -25,7 +25,23 @@ def _load_yaml_file() -> dict:
 
 def get_task_field(field: TaskField) -> list:
     data = _load_yaml_file()
-    return data.get(field, [])
+    raw_list = data.get(field.value, []) # Usa .value explicitamente para garantir a string da chave
+    
+    if not isinstance(raw_list, list):
+        return []
+        
+    # SEGREDO DA SEGURANÇA: Converte itens como False (que era "no") de volta para string "no"
+    # Se o item extraído for o booleano False, nós traduzimos explicitamente para "no"
+    clean_list = []
+    for item in raw_list:
+        if item is False:
+            clean_list.append("no")
+        elif item is True:
+            clean_list.append("yes")
+        elif item is not None:
+            clean_list.append(str(item))
+            
+    return clean_list
 
 def clear_patterns_cache():
     _load_yaml_file.cache_clear()
