@@ -51,7 +51,7 @@ def confirm_candidate_from_text(text, resolved_by=None):
             "message": f"Não encontrei o candidato #{candidate_id}.",
         }
 
-    candidate_id, normalized_text, status = candidate
+    candidate_id, normalized_text, status, source_sender_name = candidate
 
     if status != "pending_confirmation":
         return {
@@ -101,7 +101,7 @@ def reject_candidate_from_text(text, resolved_by=None):
             "message": f"Não encontrei o candidato #{candidate_id}.",
         }
 
-    candidate_id, normalized_text, status = candidate
+    candidate_id, normalized_text, status, source_sender_name = candidate
 
     if status != "pending_confirmation":
         return {

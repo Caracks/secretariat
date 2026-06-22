@@ -38,7 +38,6 @@ prefixes:
   - não esquecer de
   - nao esquecer de
   - temos de
-  - tenho de
   - preciso de
   - devemos
 
@@ -53,7 +52,7 @@ done_keywords:
 confirm_keywords:
   - sim
   - ya
-  - yes
+  - "yes"
   - yup
   - claro
   - confirma
@@ -63,7 +62,8 @@ confirm_keywords:
 candidate_keywords:
   - temos de ver
   - temos de tratar
-  - bora jantar
+  - bora
+  - tenho
   - combinamos
   - temos de combinar
   - fica para ver
@@ -75,7 +75,7 @@ reject_keywords:
   - nao
   - nop
   - nope
-  - no
+  - "no"
   - rejeita
   - rejeitar
   - rejeitado
