@@ -1,4 +1,4 @@
-from core.pattern_loader import load_task_prefixes, load_done_keywords
+from core.pattern_loader import  load_done_keywords, load_list_keywords
 from tools.task_tool import (
     create_task_from_text,
     normalize_task_text,
@@ -8,9 +8,9 @@ from tools.task_tool import (
 
 
 def is_list_request(text):
-    prefixes = load_task_prefixes()
+    list_keywords = load_list_keywords()
     clean_text = (text or "").lower()
-    return any(keyword in clean_text for keyword in prefixes)
+    return any(keyword in clean_text for keyword in list_keywords)
 
 
 def is_done_request(text):
