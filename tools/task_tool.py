@@ -7,7 +7,7 @@ def normalize_task_text(text):
     clean_text = (text or "").strip()
     lower_text = clean_text.lower()
 
-    task_prefixes = get_task_field(TaskField.task_prefixes)
+    task_prefixes = get_task_field(TaskField.prefixes)
 
     for prefix in task_prefixes:
         if lower_text.startswith(prefix):
