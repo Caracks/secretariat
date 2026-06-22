@@ -38,7 +38,6 @@ prefixes:
   - não esquecer de
   - nao esquecer de
   - temos de
-  - tenho de
   - preciso de
   - devemos
 
@@ -63,7 +62,8 @@ confirm_keywords:
 candidate_keywords:
   - temos de ver
   - temos de tratar
-  - bora jantar
+  - bora
+  - tenho
   - combinamos
   - temos de combinar
   - fica para ver

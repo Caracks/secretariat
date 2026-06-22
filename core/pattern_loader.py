@@ -30,8 +30,6 @@ def get_task_field(field: TaskField) -> list:
     if not isinstance(raw_list, list):
         return []
         
-    # SEGREDO DA SEGURANÇA: Converte itens como False (que era "no") de volta para string "no"
-    # Se o item extraído for o booleano False, nós traduzimos explicitamente para "no"
     clean_list = []
     for item in raw_list:
         if item is False:

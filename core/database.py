@@ -60,6 +60,8 @@ def init_db():
                 title TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'open',
                 source TEXT,
+                raw_text TEXT,
+                normalized_text TEXT,
                 created_by TEXT,
                 created_at TEXT NOT NULL
             )
@@ -279,6 +281,12 @@ def complete_task(task_id):
         )
 
         conn.commit()
+
+        return {
+            "success": True,
+            "reason": "completed",
+            "message": f"Pendente #{task_id} concluído: {title}",
+        }
 
 
 def create_task_candidate(
