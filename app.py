@@ -1,23 +1,30 @@
-from flask import Flask, request, jsonify
+import os
 import time
+from flask import Flask, request, jsonify
 
-from core.config import APP_HOST, APP_PORT
+from core.logger import log
+from core.normalizer import normalize_whatsapp_data, get_data_list
+from core.whatsapp import send_whatsapp_message
+from agents.rute.agent import route_message
+from agents.bootstrap import register_agents
+from agents.agent_registry import registry
+
+from core.config import (
+    APP_HOST,
+    APP_PORT,
+    AUTHORIZED_GROUP_ID,
+    PRIVATE_CONTACT_AUTO_REPLY,
+)
 from core.database import (
     init_db,
     is_duplicate,
     save_inbound_message,
-    save_webhook_event
+    save_webhook_event,
 )
-from core.logger import log
-from core.normalizer import normalize_whatsapp_data, get_data_list
-from core.whatsapp import send_whatsapp_message
-from core.rute import route_message
-from agents.hello_agent import run as hello_agent_run
-from agents.bootstrap import register_agents
-from agents.agent_registry import registry
 
 app = Flask(__name__)
 register_agents()
+
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -27,7 +34,6 @@ def health():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     payload = request.get_json(silent=True) or {}
-
     event = payload.get("event")
 
     if event != "messages.upsert":
@@ -57,7 +63,34 @@ def webhook():
             log("SKIP DUPLICATE:", message["message_id"])
             continue
 
-        log("PROCESS:", message["message_id"], message["text"])
+        group_id = message["group_id"]
+        is_group_message = group_id.endswith("@g.us") if group_id else False
+        is_authorized_group = group_id == AUTHORIZED_GROUP_ID
+
+        if is_group_message and not is_authorized_group:
+            log("SKIP UNAUTHORIZED GROUP:", group_id)
+            continue
+
+        if is_group_message and not is_authorized_group:
+            log("IGNORE UNAUTHORIZED GROUP:", group_id)
+            continue
+
+        if not is_group_message:
+            log("PRIVATE CONTACT MESSAGE:", group_id)
+
+            send_whatsapp_message(
+                group_id=group_id,
+                text=PRIVATE_CONTACT_AUTO_REPLY,
+                related_message_id=message["message_id"],
+            )
+
+        log(
+            "PROCESS:",
+            message["message_id"],
+            message["group_id"],
+            message["sender_id"],
+            message["text"],
+        )
 
         save_inbound_message(
             message_id=message["message_id"],
@@ -65,7 +98,7 @@ def webhook():
             sender_id=message["sender_id"],
             sender_name=message["sender_name"],
             text=message["text"],
-            raw_payload=message["raw"]
+            raw_payload=message["raw"],
         )
 
         if not message["group_id"] or not message["text"]:
@@ -75,8 +108,8 @@ def webhook():
         agent = registry.get(route["agent"])
 
         if agent is None:
-         log("No Agent found:", route["agent"])
-         continue
+            log("No Agent found:", route["agent"])
+            continue
 
         agent_result = agent["run"](message)
 
@@ -86,16 +119,14 @@ def webhook():
             send_whatsapp_message(
                 group_id=message["group_id"],
                 text=agent_result["text"],
-                related_message_id=message["message_id"]
+                related_message_id=message["message_id"],
             )
 
         processed_count += 1
 
-    return jsonify({
-        "status": "ok",
-        "processed": processed_count,
-        "duplicates": duplicate_count
-    })
+    return jsonify(
+        {"status": "ok", "processed": processed_count, "duplicates": duplicate_count}
+    )
 
 
 init_db()
