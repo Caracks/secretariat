@@ -60,6 +60,16 @@ confirm_keywords:
   - confirmar
   - confirmado
 
+candidate_keywords:
+  - temos de ver
+  - temos de tratar
+  - bora jantar
+  - combinamos
+  - temos de combinar
+  - fica para ver
+  - depois vemos
+  - vamos ver isso
+
 reject_keywords:
   - não
   - nao

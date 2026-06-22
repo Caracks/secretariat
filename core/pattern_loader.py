@@ -14,6 +14,7 @@ class TaskField(str, Enum):
     list_keywords = "list_keywords"
     confirm_keywords = "confirm_keywords"
     reject_keywords = "reject_keywords"
+    candidate_keywords = "candidate_keywords"
 
 @lru_cache(maxsize=1)
 def _load_yaml_file() -> dict:
