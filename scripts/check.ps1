@@ -23,5 +23,17 @@ if ($LASTEXITCODE -ne 0) {
 
 python -c "from app import app; print('app import ok')"
 
+Write-Host "Running tests..."
+python -m pytest
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+Write-Host "Compiling..."
+python -m compileall .
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
+Write-Host "Validating app import..."
+python -c "from app import app; print('app import ok')"
+if ($LASTEXITCODE -ne 0) { exit 1 }
+
 Write-Host ""
 Write-Host "All checks passed."
