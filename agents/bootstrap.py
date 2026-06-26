@@ -1,6 +1,6 @@
 from agents.agent_registry import registry
 from agents.hello_agent import agent as hello_agent
-from agents.dario.agent import agent as dario_agent
+from agents.josefa.agent import agent as josefa_agent
 
 
 def register_agents():
@@ -10,6 +10,6 @@ def register_agents():
     )
 
     registry.register(
-        dario_agent["name"],
-        dario_agent
+        josefa_agent["name"],
+        josefa_agent
     )

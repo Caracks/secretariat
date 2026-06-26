@@ -7,7 +7,7 @@ def route_message(message):
 
     if any(keyword in text for keyword in task_keywords + done_keywords):
         return {
-            "agent": "dario",
+            "agent": "josefa",
             "confidence": 0.95,
             "reason": "task_keyword_detected"
         }
