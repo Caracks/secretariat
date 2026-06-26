@@ -1,47 +1,36 @@
-from core.pattern_loader import load_task_prefixes, load_done_keywords
-from tools.task_tool import (
-    create_task_from_text,
-    normalize_task_text,
-    get_open_tasks_text,
-    complete_task_from_text,
-)
+from core.pattern_loader import TaskField, get_task_field
 
+def route_message(message):
+    text = (message.get("text") or "").lower()
+    task_keywords = get_task_field(TaskField.keywords)
+    done_keywords = get_task_field(TaskField.done_keywords)
+    candidate_keywords = get_task_field(TaskField.candidate_keywords)
+    candidate_confirm_keywords = get_task_field(TaskField.confirm_keywords)
+    candidate_reject_keywords = get_task_field(TaskField.reject_keywords)
 
-def is_list_request(text):
-    prefixes = load_task_prefixes()
-    clean_text = (text or "").lower()
-    return any(keyword in clean_text for keyword in prefixes)
+    if any(keyword in text for keyword in candidate_confirm_keywords + candidate_reject_keywords):
+        return {
+            "agent": "candido",
+            "confidence": 0.99,
+            "reason": "candidate_resolution_detected"
+        }
 
+    if any(keyword in text for keyword in candidate_keywords):
+        return {
+            "agent": "candido",
+            "confidence": 0.85,
+            "reason": "candidate_task_detected"
+        }
 
-def is_done_request(text):
-    done_keywords = load_done_keywords()
-    clean_text = (text or "").lower()
-    return any(keyword in clean_text for keyword in done_keywords)
+    if any(keyword in text for keyword in task_keywords + done_keywords):
+        return {
+            "agent": "josefa",
+            "confidence": 0.95,
+            "reason": "task_keyword_detected"
+        }
 
-
-def run(message):
-    raw_text = message["text"]
-
-    if is_list_request(raw_text):
-        return {"should_reply": True, "text": get_open_tasks_text()}
-
-    if is_done_request(raw_text):
-        result = complete_task_from_text(raw_text)
-
-        return {"should_reply": True, "text": result["message"]}
-
-    normalized_text = normalize_task_text(raw_text)
-
-    task_id = create_task_from_text(text=raw_text, sender_name=message["sender_name"])
-
-    return {"should_reply": True, "text": f"Task criada #{task_id}: {normalized_text}"}
-
-
-agent = {
-    "name": "dario",
-    "display_name": "Dário",
-    "description": "Task agent responsible for detecting and managing pending tasks.",
-    "instruction_file": "agents/dario/instructions.md",
-    "skills_file": "agents/dario/skills.md",
-    "run": run,
-}
+    return {
+        "agent": "hello_agent",
+        "confidence": 1.0,
+        "reason": "mvp_default_route"
+    }

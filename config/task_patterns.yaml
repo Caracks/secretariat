@@ -13,6 +13,20 @@ keywords:
   - preciso de
   - devemos
   - feito
+  - concluído
+  - concluido
+  - done
+  - terminado
+  - pronto
+
+list_keywords:
+  - pendentes
+  - meus pendentes
+  - quais são os meus pendentes
+  - quais sao os meus pendentes
+  - o que tenho por fazer
+  - tarefas em aberto
+  - lista de tarefas
 
 prefixes:
   - tenho um pendente para
@@ -24,10 +38,9 @@ prefixes:
   - não esquecer de
   - nao esquecer de
   - temos de
-  - tenho de
   - preciso de
   - devemos
-  
+
 done_keywords:
   - feito
   - concluído
@@ -35,3 +48,34 @@ done_keywords:
   - done
   - terminado
   - pronto
+
+confirm_keywords:
+  - sim
+  - ya
+  - "yes"
+  - yup
+  - claro
+  - confirma
+  - confirmar
+  - confirmado
+
+candidate_keywords:
+  - temos de ver
+  - temos de tratar
+  - bora
+  - tenho
+  - combinamos
+  - temos de combinar
+  - fica para ver
+  - depois vemos
+  - vamos ver isso
+
+reject_keywords:
+  - não
+  - nao
+  - nop
+  - nope
+  - "no"
+  - rejeita
+  - rejeitar
+  - rejeitado

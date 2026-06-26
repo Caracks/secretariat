@@ -1,0 +1,34 @@
+event_keywords:
+  - jantar
+  - almoçar
+  - almocar
+  - almoço
+  - almoco
+  - café
+  - cafe
+  - reunião
+  - reuniao
+  - ensaio
+  - consulta
+  - evento
+  - concerto
+
+date_patterns:
+  - "\\bdia\\s+(\\d{1,2})\\b"
+  - "\\bamanhã\\b"
+  - "\\bamanha\\b"
+  - "\\bsegunda\\b"
+  - "\\bterça\\b"
+  - "\\bterca\\b"
+  - "\\bquarta\\b"
+  - "\\bquinta\\b"
+  - "\\bsexta\\b"
+  - "\\bsábado\\b"
+  - "\\bsabado\\b"
+  - "\\bdomingo\\b"
+
+time_patterns:
+  - "\\bàs\\s+(\\d{1,2})h\\b"
+  - "\\bas\\s+(\\d{1,2})h\\b"
+  - "\\b(\\d{1,2})h\\b"
+  - "\\b(\\d{1,2}):(\\d{2})\\b"

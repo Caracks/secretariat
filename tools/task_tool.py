@@ -1,14 +1,14 @@
 import re
 from core.database import create_task, list_open_tasks, complete_task
-from core.pattern_loader import load_task_prefixes
+from core.pattern_loader import load_task_patterns
+
+task_patterns = load_task_patterns()
 
 def normalize_task_text(text):
     clean_text = (text or "").strip()
     lower_text = clean_text.lower()
 
-    task_prefixes = load_task_prefixes()
-
-    for prefix in task_prefixes:
+    for prefix in task_patterns.prefixes:
         if lower_text.startswith(prefix):
             return clean_text[len(prefix) :].strip()
 
@@ -27,6 +27,7 @@ def create_task_from_text(text, sender_name=None):
 
     return task_id
 
+
 def get_open_tasks_text():
     tasks = list_open_tasks()
 
@@ -39,6 +40,7 @@ def get_open_tasks_text():
         lines.append(f"#{task_id} {title}")
 
     return "\n".join(lines)
+
 
 def extract_task_id(text):
     match = re.search(r"#?(\d+)", text or "")
@@ -55,7 +57,7 @@ def complete_task_from_text(text):
     if task_id is None:
         return {
             "success": False,
-            "message": "Não percebi qual é o pendente a concluir."
+            "message": "Não percebi qual é o pendente a concluir.",
         }
 
     success = complete_task(task_id)
@@ -63,10 +65,7 @@ def complete_task_from_text(text):
     if not success:
         return {
             "success": False,
-            "message": f"Não encontrei o pendente #{task_id} em aberto."
+            "message": f"Não encontrei o pendente #{task_id} em aberto.",
         }
 
-    return {
-        "success": True,
-        "message": f"Task #{task_id} concluída."
-    }
+    return {"success": True, "message": f"Task #{task_id} concluída."}

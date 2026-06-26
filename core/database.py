@@ -2,7 +2,7 @@ import sqlite3
 import os
 import json
 from datetime import datetime, timezone
-from core.config import DB_PATH
+from core.config import Settings
 
 
 def utc_now():
@@ -10,8 +10,8 @@ def utc_now():
 
 
 def db_connect():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    return sqlite3.connect(DB_PATH)
+    os.makedirs(os.path.dirname(Settings.DB_PATH), exist_ok=True)
+    return sqlite3.connect(Settings.DB_PATH)
 
 
 def init_db():

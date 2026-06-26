@@ -1,24 +1,30 @@
+from types import SimpleNamespace
 from pathlib import Path
 import yaml
+from core.config import settings
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-TASK_PATTERNS_PATH = BASE_DIR / "config" / "task_patterns.yaml"
+TASK_PATTERNS_PATH = Path(settings.task_patterns_path)
+CALENDAR_PATTERNS_PATH = Path(settings.calendar_patterns_path)
+print(TASK_PATTERNS_PATH)
+print(CALENDAR_PATTERNS_PATH)
 
-def load_task_patterns():
-    with TASK_PATTERNS_PATH.open("r", encoding="utf-8") as file:
-        data = yaml.safe_load(file) or {}
 
-    return {
-        "keywords": data.get("keywords", []),
-        "prefixes": data.get("prefixes", []),
-        "done_keywords": data.get("done_keywords", [])
-    }
+def load_yaml(path: Path) -> dict:
+    if not path.exists():
+        raise FileNotFoundError(f"Arquivo de padrões não encontrado em: {path}")
 
-def load_task_keywords():
-    return load_task_patterns()["keywords"]
+    with path.open("r", encoding="utf-8") as file:
+        return yaml.safe_load(file) or {}
 
-def load_task_prefixes():
-    return load_task_patterns()["prefixes"]
 
-def load_done_keywords():
-    return load_task_patterns().get("done_keywords", [])
+def load_patterns_as_namespace(path: Path) -> SimpleNamespace:
+    data = load_yaml(path)
+    return SimpleNamespace(**data)
+
+
+def load_task_patterns() -> SimpleNamespace:
+    return load_patterns_as_namespace(TASK_PATTERNS_PATH)
+
+
+def load_calendar_patterns() -> SimpleNamespace:
+    return load_patterns_as_namespace(CALENDAR_PATTERNS_PATH)

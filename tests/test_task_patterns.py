@@ -1,12 +1,14 @@
-from core.pattern_loader import load_task_keywords, load_task_prefixes
+from core.pattern_loader import load_task_patterns
 
 def test_task_patterns_load_keywords():
-    keywords = load_task_keywords()
+    task_patterns = load_task_patterns()
+    keywords = task_patterns.keywords
     assert "pendente" in keywords
     assert "temos de" in keywords
 
 
 def test_task_patterns_load_prefixes():
-    prefixes = load_task_prefixes()
+    task_patterns = load_task_patterns()
+    prefixes = task_patterns.prefixes
     assert "tenho um pendente para" in prefixes
     assert "temos de" in prefixes
