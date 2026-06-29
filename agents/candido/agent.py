@@ -42,8 +42,8 @@ def run(message):
         "text": (
             f"Possível pendente #{result['candidate_id']}: "
             f"{result['normalized_text']}\n"
-            f'Responde "sim" para confirmar '
-            f'ou "não" para rejeitar.'
+            f'Responde "sim #{result["candidate_id"]}" para confirmar '
+            f'ou "não #{result["candidate_id"]}" para rejeitar.'
         ),
     }
 
