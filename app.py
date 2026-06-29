@@ -100,4 +100,4 @@ def webhook():
 init_db()
 
 if __name__ == "__main__":
-    app.run(host=Settings.APP_HOST, port=Settings.APP_PORT)
+    app.run(host=Settings.app_host, port=Settings.app_port)

@@ -6,14 +6,14 @@ from core.logger import log
 
 
 def send_whatsapp_message(group_id: str, text: str, related_message_id: str = None):
-    url = f"{Settings.EVOLUTION_API_URL}/message/sendText/{Settings.EVOLUTION_INSTANCE}"
+    url = f"{Settings.evolution_api_url}/message/sendText/{Settings.evolution_instance}"
 
     headers = {
         "Content-Type": "application/json"
     }
 
-    if Settings.EVOLUTION_API_KEY:
-        headers["apikey"] = Settings.EVOLUTION_API_KEY
+    if Settings.evolution_api_url:
+        headers["apikey"] = Settings.evolution_api_key
 
     payload = {
         "number": group_id,
