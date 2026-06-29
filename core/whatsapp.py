@@ -1,19 +1,19 @@
 import requests
 
-from core.config import EVOLUTION_API_URL, EVOLUTION_INSTANCE, EVOLUTION_API_KEY
+from core.config import Settings
 from core.database import save_outbound_message
 from core.logger import log
 
 
 def send_whatsapp_message(group_id: str, text: str, related_message_id: str = None):
-    url = f"{EVOLUTION_API_URL}/message/sendText/{EVOLUTION_INSTANCE}"
+    url = f"{Settings.EVOLUTION_API_URL}/message/sendText/{Settings.EVOLUTION_INSTANCE}"
 
     headers = {
         "Content-Type": "application/json"
     }
 
-    if EVOLUTION_API_KEY:
-        headers["apikey"] = EVOLUTION_API_KEY
+    if Settings.EVOLUTION_API_KEY:
+        headers["apikey"] = Settings.EVOLUTION_API_KEY
 
     payload = {
         "number": group_id,

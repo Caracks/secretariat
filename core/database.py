@@ -10,8 +10,8 @@ def utc_now():
 
 
 def db_connect():
-    os.makedirs(os.path.dirname(Settings.DB_PATH), exist_ok=True)
-    return sqlite3.connect(Settings.DB_PATH)
+    os.makedirs(os.path.dirname(Settings.db_path), exist_ok=True)
+    return sqlite3.connect(Settings.db_path)
 
 
 def init_db():

@@ -1,6 +1,5 @@
 from core.pattern_loader import (
-    TASK_PATTERNS_PATH,
-    load_patterns,
+    load_task_patterns
 )
 
 from tools.task_tool import (
@@ -10,7 +9,7 @@ from tools.task_tool import (
     complete_task_from_text,
 )
 
-patterns = load_patterns(TASK_PATTERNS_PATH)
+patterns = load_task_patterns()
 
 def is_list_request(text):
     clean_text = (text or "").lower()
@@ -42,7 +41,7 @@ def run(message):
 
 agent = {
     "name": "josefa",
-    "display_name": "Dário",
+    "display_name": "Josafa",
     "description": "Task agent responsible for detecting and managing pending tasks.",
     "instruction_file": "agents/josefa/instructions.md",
     "skills_file": "agents/josefa/skills.md",

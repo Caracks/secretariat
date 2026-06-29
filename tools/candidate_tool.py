@@ -7,6 +7,7 @@ from core.database import (
     update_task_candidate_status,
 )
 
+
 def extract_candidate_id(text):
     match = re.search(r"#?(\d+)", text or "")
 
@@ -33,8 +34,9 @@ def create_candidate_from_message(message):
     }
 
 
-def confirm_candidate_from_text(text, resolved_by=None):
-    candidate_id = extract_candidate_id(text)
+def confirm_candidate_from_text(
+    text=None, candidate_id=extract_candidate_id(text), resolved_by=None
+):
 
     if candidate_id is None:
         return {

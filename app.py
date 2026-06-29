@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 import time
 
-from core.config import APP_HOST, APP_PORT
+from core.config import Settings
 from core.database import (
     init_db,
     is_duplicate,
     save_inbound_message,
-    save_webhook_event
+    save_webhook_event,
 )
 from core.logger import log
 from core.normalizer import normalize_whatsapp_data, get_data_list
@@ -18,6 +18,7 @@ from agents.agent_registry import registry
 
 app = Flask(__name__)
 register_agents()
+
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -65,7 +66,7 @@ def webhook():
             sender_id=message["sender_id"],
             sender_name=message["sender_name"],
             text=message["text"],
-            raw_payload=message["raw"]
+            raw_payload=message["raw"],
         )
 
         if not message["group_id"] or not message["text"]:
@@ -75,8 +76,8 @@ def webhook():
         agent = registry.get(route["agent"])
 
         if agent is None:
-         log("No Agent found:", route["agent"])
-         continue
+            log("No Agent found:", route["agent"])
+            continue
 
         agent_result = agent["run"](message)
 
@@ -86,19 +87,17 @@ def webhook():
             send_whatsapp_message(
                 group_id=message["group_id"],
                 text=agent_result["text"],
-                related_message_id=message["message_id"]
+                related_message_id=message["message_id"],
             )
 
         processed_count += 1
 
-    return jsonify({
-        "status": "ok",
-        "processed": processed_count,
-        "duplicates": duplicate_count
-    })
+    return jsonify(
+        {"status": "ok", "processed": processed_count, "duplicates": duplicate_count}
+    )
 
 
 init_db()
 
 if __name__ == "__main__":
-    app.run(host=APP_HOST, port=APP_PORT)
+    app.run(host=Settings.APP_HOST, port=Settings.APP_PORT)

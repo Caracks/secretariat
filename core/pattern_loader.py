@@ -1,10 +1,10 @@
 from types import SimpleNamespace
 from pathlib import Path
 import yaml
-from core.config import settings
+from core.config import Settings    
 
-TASK_PATTERNS_PATH = Path(settings.task_patterns_path)
-CALENDAR_PATTERNS_PATH = Path(settings.calendar_patterns_path)
+TASK_PATTERNS_PATH = Path(Settings.task_patterns_path)
+CALENDAR_PATTERNS_PATH = Path(Settings.calendar_patterns_path)
 print(TASK_PATTERNS_PATH)
 print(CALENDAR_PATTERNS_PATH)
 
