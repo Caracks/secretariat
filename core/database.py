@@ -59,6 +59,8 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'open',
+                raw_text TEXT,
+                normalized_text TEXT,
                 source TEXT,
                 created_by TEXT,
                 created_at TEXT NOT NULL
@@ -203,7 +205,7 @@ def list_open_tasks():
 
 def complete_task(task_id):
     with db_connect() as conn:
-        conn.execute(
+        cursor = conn.execute(
             """
             UPDATE tasks
             SET status = 'completed'
@@ -212,3 +214,4 @@ def complete_task(task_id):
             (task_id,),
         )
         conn.commit()
+    return cursor.rowcount > 0

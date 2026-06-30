@@ -20,7 +20,7 @@ def route_message(message):
     if any(k in text for k in task_patterns.candidate_keywords):
         return {"agent": "candido", "confidence": 0.85, "reason": "candidate_detected"}
 
-    if any(k in text for k in task_patterns.keywords | task_patterns.done_keywords):
+    if any(k in text for k in task_patterns.keywords + task_patterns.done_keywords):
         return {"agent": "josefa", "confidence": 0.95, "reason": "task_detected"}
 
     return {"agent": "hello_agent", "confidence": 1.0, "reason": "default"}

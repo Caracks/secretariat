@@ -5,8 +5,6 @@ from core.config import Settings
 
 TASK_PATTERNS_PATH = Path(Settings.task_patterns_path)
 CALENDAR_PATTERNS_PATH = Path(Settings.calendar_patterns_path)
-print(TASK_PATTERNS_PATH)
-print(CALENDAR_PATTERNS_PATH)
 
 
 def load_yaml(path: Path) -> dict:
