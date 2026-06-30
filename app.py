@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import time
-import agents
+from agents import rute, hello_agent
 from core.config import Settings
 from core.database import (
     init_db,
@@ -12,9 +12,7 @@ from core.logger import log
 from core.normalizer import normalize_whatsapp_data, get_data_list
 from core.whatsapp import send_whatsapp_message
 
-# from agents.rute import route_message
 # from agents.hello_agent import run as hello_agent_run
-# from agents.bootstrap import register_agents
 from agents.agent_registry import registry
 
 app = Flask(__name__)
@@ -73,7 +71,7 @@ def webhook():
         if not message["group_id"] or not message["text"]:
             continue
 
-        route = route_message(message)
+        route = rute.route_message(message)
         agent = registry.get(route["agent"])
 
         if agent is None:
