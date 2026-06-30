@@ -3,7 +3,6 @@ from core.pattern_loader import (
     load_patterns,
 )
 
-
 def route_message(message):
     text = (message.get("text") or "").lower()
     task_patterns = load_patterns(TASK_PATTERNS_PATH)
@@ -25,3 +24,4 @@ def route_message(message):
         return {"agent": "josefa", "confidence": 0.95, "reason": "task_detected"}
 
     return {"agent": "hello_agent", "confidence": 1.0, "reason": "default"}
+

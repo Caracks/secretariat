@@ -1,4 +1,5 @@
 from core.pattern_loader import TaskField, get_task_field
+from agents import registry
 from tools.candidate_tool import (
     create_candidate_from_message,
     confirm_candidate_from_text,
@@ -56,3 +57,5 @@ agent = {
     "skills_file": "agents/candido/skills.md",
     "run": run,
 }
+
+registry.register(agent["name"], agent)

@@ -1,3 +1,4 @@
+from agents import registry
 from core.pattern_loader import (
     load_task_patterns
 )
@@ -13,7 +14,7 @@ patterns = load_task_patterns()
 
 def is_list_request(text):
     clean_text = (text or "").lower()
-    return any(keyword in clean_text for keyword in patterns.prefixes)
+    return any(keyword in clean_text for keyword in patterns.list_keywords)
 
 
 def is_done_request(text):
@@ -47,3 +48,5 @@ agent = {
     "skills_file": "agents/josefa/skills.md",
     "run": run,
 }
+
+registry.register(agent["name"], agent)
