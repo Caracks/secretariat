@@ -9,7 +9,7 @@ def route_message(message):
 
     if any(
         k in text
-        for k in task_patterns.confirm_keywords | task_patterns.reject_keywords
+        for k in task_patterns.confirm_keywords + task_patterns.reject_keywords
     ):
         return {
             "agent": "candido",
