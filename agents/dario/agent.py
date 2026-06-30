@@ -1,36 +1,32 @@
-from core.pattern_loader import TaskField, get_task_field
+from tools.calendar_tool import parse_event_candidate
 
-def route_message(message):
-    text = (message.get("text") or "").lower()
-    task_keywords = get_task_field(TaskField.keywords)
-    done_keywords = get_task_field(TaskField.done_keywords)
-    candidate_keywords = get_task_field(TaskField.candidate_keywords)
-    candidate_confirm_keywords = get_task_field(TaskField.confirm_keywords)
-    candidate_reject_keywords = get_task_field(TaskField.reject_keywords)
 
-    if any(keyword in text for keyword in candidate_confirm_keywords + candidate_reject_keywords):
+def run(message):
+    result = parse_event_candidate(message.get("text"))
+
+    if not result["is_event"]:
         return {
-            "agent": "candido",
-            "confidence": 0.99,
-            "reason": "candidate_resolution_detected"
-        }
-
-    if any(keyword in text for keyword in candidate_keywords):
-        return {
-            "agent": "candido",
-            "confidence": 0.85,
-            "reason": "candidate_task_detected"
-        }
-
-    if any(keyword in text for keyword in task_keywords + done_keywords):
-        return {
-            "agent": "josefa",
-            "confidence": 0.95,
-            "reason": "task_keyword_detected"
+            "should_reply": False,
+            "text": None,
         }
 
     return {
-        "agent": "hello_agent",
-        "confidence": 1.0,
-        "reason": "mvp_default_route"
+        "should_reply": True,
+        "text": (
+            "Possível evento detetado:\n"
+            f"- Tipo: {result['title']}\n"
+            f"- Data: {result['date_text']}\n"
+            f"- Hora: {result['time_text'] or 'por confirmar'}\n\n"
+            "Ainda não criei nada no calendário. "
+        ),
     }
+
+
+agent = {
+    "name": "dario",
+    "display_name": "Dário",
+    "description": "Calendar agent responsible for detecting possible calendar events.",
+    "instruction_file": "agents/dario/instructions.md",
+    "skills_file": "agents/dario/skills.md",
+    "run": run,
+}
