@@ -1,11 +1,11 @@
 from core.pattern_loader import (
     TASK_PATTERNS_PATH,
-    load_patterns,
+    load_patterns_as_namespace,
 )
 
 def route_message(message):
     text = (message.get("text") or "").lower()
-    task_patterns = load_patterns(TASK_PATTERNS_PATH)
+    task_patterns = load_patterns_as_namespace(TASK_PATTERNS_PATH)
 
     if any(
         k in text
