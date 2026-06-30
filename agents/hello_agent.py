@@ -13,4 +13,3 @@ agent = {
     "run": run
 }
 
-registry.register(agent["name"], agent)

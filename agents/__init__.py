@@ -21,6 +21,8 @@ for _, module_name, is_pkg in pkgutil.iter_modules([package_dir]):
                 sub_module = importlib.import_module(f"{full_module_name}.agent")
                 if hasattr(sub_module, "agent"):
                     agent_obj = getattr(sub_module, "agent")
+                    registry.register(agent_obj["name"], agent_obj)
+
                     var_name = f"{module_name}_agent"
                     globals()[var_name] = agent_obj
                     __all__.append(var_name)
@@ -29,11 +31,9 @@ for _, module_name, is_pkg in pkgutil.iter_modules([package_dir]):
         else:
             if hasattr(module, "agent"):
                 agent_obj = getattr(module, "agent")
-                var_name = (
-                    f"{module_name}"
-                    if "agent" in module_name
-                    else f"{module_name}_agent"
-                )
+                registry.register(agent_obj["name"], agent_obj)
+
+                var_name = f"{module_name}_agent"
                 globals()[var_name] = agent_obj
                 __all__.append(var_name)
 

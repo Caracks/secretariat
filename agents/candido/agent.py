@@ -57,5 +57,3 @@ agent = {
     "skills_file": "agents/candido/skills.md",
     "run": run,
 }
-
-registry.register(agent["name"], agent)

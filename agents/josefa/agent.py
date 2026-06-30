@@ -48,5 +48,3 @@ agent = {
     "skills_file": "agents/josefa/skills.md",
     "run": run,
 }
-
-registry.register(agent["name"], agent)
