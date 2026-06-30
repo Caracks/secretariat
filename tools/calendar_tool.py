@@ -22,6 +22,11 @@ def _detect_event_keyword(text):
 
     return None
 
+def clean_time(time_text):
+    if not time_text:
+        return None
+
+    return re.sub(r"^.*?(?=\d)", "", time_text.lower(), flags=re.IGNORECASE)
 
 def parse_event_candidate(text):
     clean_text = (text or "").strip()
@@ -53,7 +58,7 @@ def parse_event_candidate(text):
         "is_event": is_event,
         "title": event_keyword,
         "date_text": date_text,
-        "time_text": time_text,
+        "time_text": clean_time(time_text),
         "confidence": confidence,
         "reason": "event_keyword_and_date"
         if is_event
