@@ -12,6 +12,7 @@ event_keywords:
   - consulta
   - evento
   - concerto
+  - casamento
 
 date_patterns:
   - "\\bdia\\s+(\\d{1,2})\\b"
