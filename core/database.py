@@ -292,3 +292,32 @@ def update_task_candidate_status(candidate_id, status, resolved_by=None):
 
         conn.commit()
         return cursor.rowcount > 0
+    
+def is_chat_blocked(chat_id):
+    with db_connect() as conn:
+        row = conn.execute(
+            """
+            SELECT 1
+            FROM blocked_chats
+            WHERE chat_id = ?
+            LIMIT 1
+        """,
+            (chat_id,),
+        ).fetchone()
+
+    return row is not None
+
+def block_chat(chat_id, reason="wrong_contact_auto_reply_sent"):
+    with db_connect() as conn:
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO blocked_chats (
+                chat_id,
+                reason,
+                created_at
+            )
+            VALUES (?, ?, ?)
+        """,
+            (chat_id, reason, utc_now()),
+        )
+        conn.commit()
