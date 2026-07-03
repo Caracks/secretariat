@@ -5,7 +5,7 @@ from agents.rute.agent import route_message
 
 from core.logger import log
 from core.normalizer import normalize_whatsapp_data, get_data_list
-from core.whatsapp import EvolutionAPI
+from tools.evolution_api import EvolutionAPI
 from core.config import Settings, WRONG_CONTACT_AUTO_REPLY, AUTHORIZED_GROUP_ID
 from core.database import (
     init_db,

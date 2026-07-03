@@ -12,8 +12,8 @@ DEFAULT_DB_PATH = str(BASE_DIR / "storage" / "bot.db")
 DEFAULT_TASK_PATTERNS = str(BASE_DIR / "config" / "task_patterns.yaml")
 DEFAULT_CALENDAR_PATTERNS = str(BASE_DIR / "config" / "calendar_patterns.yaml")
 AUTHORIZED_GROUP_ID = os.getenv("AUTHORIZED_GROUP_ID")
-WRONG_CONTACT_AUTO_REPLY = """Olá! Este número já não pertence à pessoa que procura. Foi recentemente alterado e agora é um canal automatizado. Por favor, apague este contacto. Obrigado"""
-
+WRONG_CONTACT_AUTO_REPLY = "Olá! Este número já não pertence à pessoa que procura. Foi recentemente alterado e agora é um canal automatizado. Por favor, apague este contacto. Obrigado."
+MSG_CALL= "Olá, este número é apenas um canal automatizado e não aceita chamadas."
 
 @dataclass(frozen=True)
 class Settings:
