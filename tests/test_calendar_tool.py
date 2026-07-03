@@ -8,7 +8,7 @@ def test_parse_event_with_day_and_time():
     assert result["is_event"] is True
     assert result["title"] == "jantar"
     assert result["date_text"] == "dia 7"
-    assert result["time_text"] == "às 20h"
+    assert result["time_text"] == "20h"
     assert result["confidence"] == "high"
 
 

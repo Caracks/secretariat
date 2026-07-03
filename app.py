@@ -3,22 +3,27 @@ import time
 from agents import registry
 from agents.rute.agent import route_message
 
-from core.config import Settings
+from core.logger import log
+from core.normalizer import normalize_whatsapp_data, get_data_list
+from core.whatsapp import EvolutionAPI
+from core.config import Settings, WRONG_CONTACT_AUTO_REPLY, AUTHORIZED_GROUP_ID
 from core.database import (
     init_db,
     is_duplicate,
     save_inbound_message,
     save_webhook_event,
+    is_chat_blocked,
+    block_chat,
 )
-from core.logger import log
-from core.normalizer import normalize_whatsapp_data, get_data_list
-from core.whatsapp import send_whatsapp_message
 
 
-
+evolution_api = EvolutionAPI(
+    api_url=Settings.evolution_api_url,
+    instance=Settings.evolution_instance,
+    api_key=Settings.evolution_api_key,
+)
 
 app = Flask(__name__)
-
 
 
 @app.route("/health", methods=["GET"])
@@ -47,6 +52,26 @@ def webhook():
 
     for data in data_list:
         message = normalize_whatsapp_data(data)
+        chat_id = message["group_id"]
+
+        if not chat_id:
+            continue
+
+        if AUTHORIZED_GROUP_ID and chat_id != AUTHORIZED_GROUP_ID:
+            if is_chat_blocked(chat_id):
+                log("SKIP BLOCKED CHAT:", chat_id)
+                continue
+            log("SKIP UNAUTHORIZED CHAT:", chat_id)
+
+            evolution_api.call(
+                endpoint="message",
+                action="sendText",
+                payload={"number": chat_id, "text": WRONG_CONTACT_AUTO_REPLY},
+                related_message_id=message["message_id"],
+            )
+
+            block_chat(chat_id)
+            continue
 
         if message["from_me"]:
             continue
@@ -85,9 +110,10 @@ def webhook():
         if agent_result.get("should_reply"):
             time.sleep(0.2)
 
-            send_whatsapp_message(
-                group_id=message["group_id"],
-                text=agent_result["text"],
+            evolution_api.call(
+                endpoint="message",
+                action="sendText",
+                payload={"number": message["group_id"], "text": agent_result["text"]},
                 related_message_id=message["message_id"],
             )
 

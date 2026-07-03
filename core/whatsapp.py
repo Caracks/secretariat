@@ -1,55 +1,56 @@
 import requests
-
-from core.config import Settings
 from core.database import save_outbound_message
 from core.logger import log
 
+class EvolutionAPI:
+    def __init__(self, api_url, instance, api_key):
+        self.api_url = api_url.rstrip("/")
+        self.instance = instance
+        self.api_key = api_key
 
-def send_whatsapp_message(group_id: str, text: str, related_message_id: str = None):
-    url = f"{Settings.evolution_api_url}/message/sendText/{Settings.evolution_instance}"
+    def call(self, endpoint: str, action: str, payload: dict, related_message_id=None, **kwargs):
+        """
+        endpoint: 'message', 'settings', 'group', etc.
+        action: 'sendText', 'rejectCall', etc.
+        kwargs: payload dinâmico
+        """
+        
+        url = f"{self.api_url}/{endpoint}/{action}/{self.instance}"
 
-    headers = {
-        "Content-Type": "application/json"
-    }
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["apikey"] = self.api_key
 
-    if Settings.evolution_api_url:
-        headers["apikey"] = Settings.evolution_api_key
+        payload = {**payload, **kwargs}
+        
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
 
-    payload = {
-        "number": group_id,
-        "text": text
-    }
+            log("SEND STATUS:", response.status_code)
 
-    try:
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
+            save_outbound_message(
+                related_message_id=related_message_id,
+                group_id=payload.get("number"),
+                text=payload.get("text"),
+                status_code=response.status_code,
+                response_body=response.text,
+            )
 
-        log("SEND STATUS:", response.status_code)
+            if response.status_code not in (200, 201):
+                log("SEND ERROR:", response.text)
+                return None
 
-        response_text = response.text
+            return response.json()
 
-        save_outbound_message(
-            related_message_id=related_message_id,
-            group_id=group_id,
-            text=text,
-            status_code=response.status_code,
-            response_body=response_text
-        )
+        except Exception as e:
+            log("SEND EXCEPTION:", str(e))
 
-        if response.status_code not in (200, 201):
-            log("SEND ERROR:", response_text)
+            save_outbound_message(
+                related_message_id=related_message_id,
+                group_id=payload.get("number"),
+                text=payload.get("text"),
+                status_code=None,
+                response_body=str(e),
+            )
+
             return None
-
-        return response.json()
-
-    except Exception as e:
-        log("SEND EXCEPTION:", str(e))
-
-        save_outbound_message(
-            related_message_id=related_message_id,
-            group_id=group_id,
-            text=text,
-            status_code=None,
-            response_body=str(e)
-        )
-
-        return None

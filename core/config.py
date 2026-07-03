@@ -2,7 +2,6 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from dotenv import load_dotenv
-from whatsapp import EvolutionAPI
 
 
 load_dotenv()
@@ -43,8 +42,3 @@ class Settings:
 
 
 settings = Settings()
-evolution_api = EvolutionAPI(
-    api_url=settings.evolution_api_url,
-    instance=settings.evolution_instance,
-    api_key=settings.evolution_api_key
-)
