@@ -2,7 +2,7 @@ import sqlite3
 import os
 import json
 from datetime import datetime, timezone
-from core.config import DB_PATH
+from core.config import Settings
 
 
 def utc_now():
@@ -10,8 +10,8 @@ def utc_now():
 
 
 def db_connect():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    return sqlite3.connect(DB_PATH)
+    os.makedirs(os.path.dirname(Settings.db_path), exist_ok=True)
+    return sqlite3.connect(Settings.db_path)
 
 
 def init_db():
@@ -59,6 +59,8 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'open',
+                raw_text TEXT,
+                normalized_text TEXT,
                 source TEXT,
                 raw_text TEXT,
                 normalized_text TEXT,
@@ -246,6 +248,9 @@ def list_open_tasks():
 
 def complete_task(task_id):
     with db_connect() as conn:
+<<<<<<< HEAD
+        cursor = conn.execute(
+=======
         row = conn.execute(
             """
             SELECT id, title, status
@@ -272,6 +277,7 @@ def complete_task(task_id):
             }
 
         conn.execute(
+>>>>>>> origin/main
             """
             UPDATE tasks
             SET status = 'completed'
@@ -369,6 +375,113 @@ def is_chat_blocked(chat_id):
 
     return row is not None
 
+
+def block_chat(chat_id, reason="wrong_contact_auto_reply_sent"):
+    with db_connect() as conn:
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO blocked_chats (
+                chat_id,
+                reason,
+                created_at
+            )
+            VALUES (?, ?, ?)
+        """,
+            (chat_id, reason, utc_now()),
+        )
+        conn.commit()
+    return cursor.rowcount > 0
+
+def create_task_candidate(
+    source_message_id,
+    source_chat_id,
+    source_sender_name,
+    raw_text,
+    normalized_text,
+):
+    with db_connect() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS task_candidates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_message_id TEXT,
+                source_chat_id TEXT,
+                source_sender_name TEXT,
+                raw_text TEXT NOT NULL,
+                normalized_text TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending_confirmation',
+                resolved_by TEXT,
+                created_at TEXT NOT NULL,
+                resolved_at TEXT
+            )
+        """)
+
+        cursor = conn.execute(
+            """
+            INSERT INTO task_candidates (
+                source_message_id,
+                source_chat_id,
+                source_sender_name,
+                raw_text,
+                normalized_text,
+                status,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                source_message_id,
+                source_chat_id,
+                source_sender_name,
+                raw_text,
+                normalized_text,
+                "pending_confirmation",
+                utc_now(),
+            ),
+        )
+
+        conn.commit()
+        return cursor.lastrowid
+
+
+def get_task_candidate(candidate_id):
+    with db_connect() as conn:
+        return conn.execute(
+            """
+            SELECT id, normalized_text, status, source_sender_name
+            FROM task_candidates
+            WHERE id = ?
+            """,
+            (candidate_id,),
+        ).fetchone()
+
+
+def update_task_candidate_status(candidate_id, status, resolved_by=None):
+    with db_connect() as conn:
+        cursor = conn.execute(
+            """
+            UPDATE task_candidates
+            SET status = ?, resolved_by = ?, resolved_at = ?
+            WHERE id = ?
+            """,
+            (status, resolved_by, utc_now(), candidate_id),
+        )
+
+        conn.commit()
+        return cursor.rowcount > 0
+    
+def is_chat_blocked(chat_id):
+    with db_connect() as conn:
+        row = conn.execute(
+            """
+            SELECT 1
+            FROM blocked_chats
+            WHERE chat_id = ?
+            LIMIT 1
+        """,
+            (chat_id,),
+        ).fetchone()
+
+    return row is not None
 
 def block_chat(chat_id, reason="wrong_contact_auto_reply_sent"):
     with db_connect() as conn:

@@ -1,15 +1,25 @@
 import re
 from core.database import create_task, list_open_tasks, complete_task
+<<<<<<< HEAD
+from core.pattern_loader import load_task_patterns
+
+task_patterns = load_task_patterns()
+=======
 from core.pattern_loader import get_task_field, TaskField
 
+>>>>>>> origin/main
 
 def normalize_task_text(text):
     clean_text = (text or "").strip()
     lower_text = clean_text.lower()
 
+<<<<<<< HEAD
+    for prefix in task_patterns.prefixes:
+=======
     task_prefixes = get_task_field(TaskField.prefixes)
 
     for prefix in task_prefixes:
+>>>>>>> origin/main
         if lower_text.startswith(prefix):
             return clean_text[len(prefix) :].strip()
 

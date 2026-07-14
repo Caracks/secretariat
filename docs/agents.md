@@ -9,7 +9,7 @@ Example:
 ```text
 agents/
 |
-└── dario/
+└── josefa/
     |
     ├── agent.py
     ├── instructions.md

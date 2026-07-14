@@ -10,7 +10,7 @@ from core.database import (
 )
 from core.logger import log
 from core.normalizer import normalize_whatsapp_data, get_data_list
-from core.whatsapp import send_whatsapp_message
+from tools.evolution_api import send_whatsapp_message
 from agents.hello_agent import run as hello_agent_run
 
 
