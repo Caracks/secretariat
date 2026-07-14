@@ -34,9 +34,14 @@ def create_candidate_from_message(message):
     }
 
 
+<<<<<<< HEAD
+def confirm_candidate_from_text(text=None, candidate_id=None, resolved_by=None):
+    candidate_id = extract_candidate_id(text)
+=======
 def confirm_candidate_from_text(text, resolved_by=None):
     candidate_id = extract_candidate_id(text)
 
+>>>>>>> origin/main
     if candidate_id is None:
         return {
             "success": False,
