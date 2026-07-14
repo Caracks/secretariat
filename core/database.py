@@ -62,10 +62,53 @@ def init_db():
                 raw_text TEXT,
                 normalized_text TEXT,
                 source TEXT,
+                raw_text TEXT,
+                normalized_text TEXT,
                 created_by TEXT,
                 created_at TEXT NOT NULL
             )
         """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS task_candidates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_message_id TEXT,
+                source_chat_id TEXT,
+                source_sender_name TEXT,
+                raw_text TEXT NOT NULL,
+                normalized_text TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending_confirmation',
+                created_at TEXT NOT NULL,
+                resolved_at TEXT,
+                resolved_by TEXT
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS blocked_chats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id TEXT UNIQUE NOT NULL,
+                reason TEXT,
+                created_at TEXT NOT NULL
+            )
+        """)
+
+        (
+            conn.execute("""
+            CREATE TABLE IF NOT EXISTS task_candidates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_message_id TEXT,
+                source_chat_id TEXT,
+                source_sender_name TEXT,
+                raw_text TEXT NOT NULL,
+                normalized_text TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending_confirmation',
+                created_at TEXT NOT NULL,
+                resolved_at TEXT,
+                resolved_by TEXT
+            )
+                     """),
+        )
 
         conn.commit()
 
@@ -205,13 +248,146 @@ def list_open_tasks():
 
 def complete_task(task_id):
     with db_connect() as conn:
+<<<<<<< HEAD
         cursor = conn.execute(
+=======
+        row = conn.execute(
+            """
+            SELECT id, title, status
+            FROM tasks
+            WHERE id = ?
+        """,
+            (task_id,),
+        ).fetchone()
+
+        if row is None:
+            return {
+                "success": False,
+                "reason": "not_found",
+                "message": f"Não encontrei o pendente #{task_id}.",
+            }
+
+        existing_id, title, status = row
+
+        if status != "open":
+            return {
+                "success": False,
+                "reason": "already_closed",
+                "message": f"O pendente #{task_id} já não está em aberto.",
+            }
+
+        conn.execute(
+>>>>>>> origin/main
             """
             UPDATE tasks
             SET status = 'completed'
-            WHERE id = ? AND status = 'open'
+            WHERE id = ?
         """,
             (task_id,),
+        )
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "reason": "completed",
+            "message": f"Pendente #{task_id} concluído: {title}",
+        }
+
+
+def create_task_candidate(
+    source_message_id,
+    source_chat_id,
+    source_sender_name,
+    raw_text,
+    normalized_text,
+):
+    with db_connect() as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO task_candidates (
+                source_message_id,
+                source_chat_id,
+                source_sender_name,
+                raw_text,
+                normalized_text,
+                status,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+            (
+                source_message_id,
+                source_chat_id,
+                source_sender_name,
+                raw_text,
+                normalized_text,
+                "pending_confirmation",
+                utc_now(),
+            ),
+        )
+
+        conn.commit()
+        return cursor.lastrowid
+
+
+def get_task_candidate(candidate_id):
+    with db_connect() as conn:
+        return conn.execute(
+            """
+            SELECT id, normalized_text, status, source_sender_name
+            FROM task_candidates
+            WHERE id = ?
+        """,
+            (candidate_id,),
+        ).fetchone()
+
+
+def update_task_candidate_status(candidate_id, status, resolved_by=None):
+    with db_connect() as conn:
+        cursor = conn.execute(
+            """
+            UPDATE task_candidates
+            SET status = ?,
+                resolved_at = ?,
+                resolved_by = ?
+            WHERE id = ?
+              AND status = 'pending_confirmation'
+        """,
+            (status, utc_now(), resolved_by, candidate_id),
+        )
+
+        conn.commit()
+        return cursor.rowcount > 0
+
+
+def is_chat_blocked(chat_id):
+    with db_connect() as conn:
+        row = conn.execute(
+            """
+            SELECT 1
+            FROM blocked_chats
+            WHERE chat_id = ?
+            LIMIT 1
+        """,
+            (chat_id,),
+        ).fetchone()
+
+    return row is not None
+
+
+def block_chat(chat_id, reason="wrong_contact_auto_reply_sent"):
+    with db_connect() as conn:
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO blocked_chats (
+                chat_id,
+                reason,
+                created_at
+            )
+            VALUES (?, ?, ?)
+        """,
+            (chat_id, reason, utc_now()),
         )
         conn.commit()
     return cursor.rowcount > 0
