@@ -1,21 +1,12 @@
-import time
 from flask import Flask, request, jsonify
+import time
+from agents import registry
+from agents.rute.agent import route_message
 
 from core.logger import log
-
 from core.normalizer import normalize_whatsapp_data, get_data_list
-from core.whatsapp import send_whatsapp_message
-from agents.rute.agent import route_message
-from agents.bootstrap import register_agents
-from agents.agent_registry import registry
-
-from core.config import (
-    APP_HOST,
-    APP_PORT,
-    AUTHORIZED_GROUP_ID,
-    WRONG_CONTACT_AUTO_REPLY,
-
-)
+from tools.evolution_api import EvolutionAPI
+from core.config import Settings, WRONG_CONTACT_AUTO_REPLY, AUTHORIZED_GROUP_ID
 from core.database import (
     init_db,
     is_duplicate,
@@ -25,8 +16,14 @@ from core.database import (
     block_chat,
 )
 
+
+evolution_api = EvolutionAPI(
+    api_url=Settings.evolution_api_url,
+    instance=Settings.evolution_instance,
+    api_key=Settings.evolution_api_key,
+)
+
 app = Flask(__name__)
-register_agents()
 
 
 @app.route("/health", methods=["GET"])
@@ -37,6 +34,7 @@ def health():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     payload = request.get_json(silent=True) or {}
+
     event = payload.get("event")
 
     if event != "messages.upsert":
@@ -63,12 +61,12 @@ def webhook():
             if is_chat_blocked(chat_id):
                 log("SKIP BLOCKED CHAT:", chat_id)
                 continue
+            log("SKIP UNAUTHORIZED CHAT:", chat_id)
 
-            log("WRONG CHAT AUTO REPLY:", chat_id)
-
-            send_whatsapp_message(
-                group_id=chat_id,
-                text=WRONG_CONTACT_AUTO_REPLY,
+            evolution_api.call(
+                endpoint="message",
+                action="sendText",
+                payload={"number": chat_id, "text": WRONG_CONTACT_AUTO_REPLY},
                 related_message_id=message["message_id"],
             )
 
@@ -86,13 +84,7 @@ def webhook():
             log("SKIP DUPLICATE:", message["message_id"])
             continue
 
-        log(
-            "PROCESS:",
-            message["message_id"],
-            message["group_id"],
-            message["sender_id"],
-            message["text"],
-        )
+        log("PROCESS:", message["message_id"], message["text"])
 
         save_inbound_message(
             message_id=message["message_id"],
@@ -118,9 +110,10 @@ def webhook():
         if agent_result.get("should_reply"):
             time.sleep(0.2)
 
-            send_whatsapp_message(
-                group_id=message["group_id"],
-                text=agent_result["text"],
+            evolution_api.call(
+                endpoint="message",
+                action="sendText",
+                payload={"number": message["group_id"], "text": agent_result["text"]},
                 related_message_id=message["message_id"],
             )
 
@@ -134,4 +127,4 @@ def webhook():
 init_db()
 
 if __name__ == "__main__":
-    app.run(host=APP_HOST, port=APP_PORT)
+    app.run(host=Settings.app_host, port=Settings.app_port)

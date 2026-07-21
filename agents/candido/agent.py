@@ -1,4 +1,4 @@
-from core.pattern_loader import TaskField, get_task_field
+from core.pattern_loader import load_task_patterns
 from tools.candidate_tool import (
     create_candidate_from_message,
     confirm_candidate_from_text,
@@ -8,13 +8,13 @@ from tools.candidate_tool import (
 
 def is_confirm_request(text):
     clean_text = (text or "").lower()
-    confirm_keywords = get_task_field(TaskField.confirm_keywords)
+    confirm_keywords = load_task_patterns().confirm_keywords
     return any(keyword in clean_text for keyword in confirm_keywords)
 
 
 def is_reject_request(text):
     clean_text = (text or "").lower()
-    reject_keywords = get_task_field(TaskField.reject_keywords)
+    reject_keywords = load_task_patterns().reject_keywords
     return any(keyword in clean_text for keyword in reject_keywords)
 
 
@@ -42,8 +42,8 @@ def run(message):
         "text": (
             f"Possível pendente #{result['candidate_id']}: "
             f"{result['normalized_text']}\n"
-            f'Responde "sim" para confirmar '
-            f'ou "não" para rejeitar.'
+            f'Responde "sim #{result["candidate_id"]}" para confirmar '
+            f'ou "não #{result["candidate_id"]}" para rejeitar.'
         ),
     }
 

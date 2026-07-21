@@ -1,4 +1,4 @@
-keywords:
+main_keywords:
   - pendente
   - pendentes
   - lembrar
@@ -75,7 +75,6 @@ reject_keywords:
   - nao
   - nop
   - nope
-  - "no"
   - rejeita
   - rejeitar
   - rejeitado

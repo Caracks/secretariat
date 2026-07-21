@@ -33,7 +33,7 @@ Agent Registry
         |
         +--> hello_agent
         |
-        +--> dario
+        +--> josefa
 ```
 
 ---

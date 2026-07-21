@@ -1,6 +1,6 @@
-from core.config import DEBUG
+from core.config import Settings
 
 
 def log(*args):
-    if DEBUG:
+    if Settings.debug:
         print(*args, flush=True)

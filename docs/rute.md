@@ -50,7 +50,7 @@ Example:
 
 ```json
 {
-  "agent": "dario",
+  "agent": "josefa",
   "confidence": 0.92,
   "reason": "task_detection"
 }

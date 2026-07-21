@@ -1,7 +1,9 @@
+from agents import registry
+
 def run(message):
     return {
         "should_reply": True,
-        "text": "olá:)"
+        "text": "olá 👋"
     }
 
 
@@ -10,3 +12,4 @@ agent = {
     "description": "Simple MVP hello agent",
     "run": run
 }
+
