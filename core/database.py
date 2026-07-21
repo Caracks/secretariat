@@ -63,9 +63,17 @@ def init_db():
                 normalized_text TEXT,
                 source TEXT,
                 created_by TEXT,
+                created_at TEXT NOT NULL)
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS blocked_chats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id TEXT UNIQUE NOT NULL,
+                reason TEXT,
                 created_at TEXT NOT NULL
             )
-        """)
+            """)
 
         conn.commit()
 
@@ -216,6 +224,7 @@ def complete_task(task_id):
         conn.commit()
     return cursor.rowcount > 0
 
+
 def create_task_candidate(
     source_message_id,
     source_chat_id,
@@ -292,7 +301,8 @@ def update_task_candidate_status(candidate_id, status, resolved_by=None):
 
         conn.commit()
         return cursor.rowcount > 0
-    
+
+
 def is_chat_blocked(chat_id):
     with db_connect() as conn:
         row = conn.execute(
@@ -306,6 +316,7 @@ def is_chat_blocked(chat_id):
         ).fetchone()
 
     return row is not None
+
 
 def block_chat(chat_id, reason="wrong_contact_auto_reply_sent"):
     with db_connect() as conn:
