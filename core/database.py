@@ -1,12 +1,13 @@
 import sqlite3
 import os
 import json
-from datetime import datetime, timezone
+from typing import Any
+from datetime import UTC, datetime
 from core.config import Settings
 
 
 def utc_now():
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def db_connect():
