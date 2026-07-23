@@ -3,7 +3,112 @@ import os
 import json
 from typing import Any
 from datetime import UTC, datetime
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
+from typing import Any
 from core.config import Settings
+
+
+SqlParameters = Sequence[Any] | Mapping[str, Any]
+
+
+def resolve_db_path(db_path: str | None = None) -> str:
+    """
+    Resolve the SQLite database path.
+
+    An explicit path is accepted to support isolated tests without
+    changing global application settings.
+    """
+    return db_path or Settings.db_path
+
+
+def configure_connection(connection: sqlite3.Connection) -> None:
+    """
+    Apply connection-level SQLite configuration.
+
+    foreign_keys must be enabled for every SQLite connection.
+    busy_timeout allows short concurrent writes to wait instead of
+    immediately failing with 'database is locked'.
+    """
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+    connection.execute("PRAGMA busy_timeout = 5000")
+
+
+@contextmanager
+def get_connection(
+    db_path: str | None = None,
+) -> Iterator[sqlite3.Connection]:
+    """
+    Open and close one configured SQLite connection.
+
+    Transaction ownership remains with the caller or the higher-level
+    execute/fetch functions.
+    """
+    connection = sqlite3.connect(resolve_db_path(db_path))
+    configure_connection(connection)
+
+    try:
+        yield connection
+    finally:
+        connection.close()
+
+
+def execute(
+    sql: str,
+    parameters: SqlParameters = (),
+    *,
+    db_path: str | None = None,
+) -> int:
+    """
+    Execute one write statement and commit it.
+
+    Returns cursor.lastrowid for insert-oriented commands.
+    """
+    with get_connection(db_path) as connection:
+        cursor = connection.execute(sql, parameters)
+        connection.commit()
+        return cursor.lastrowid
+
+
+def execute_many(
+    sql: str,
+    parameter_sets: Sequence[SqlParameters],
+    *,
+    db_path: str | None = None,
+) -> None:
+    """
+    Execute several writes in one transaction.
+    """
+    with get_connection(db_path) as connection:
+        connection.executemany(sql, parameter_sets)
+        connection.commit()
+
+
+def fetch_one(
+    sql: str,
+    parameters: SqlParameters = (),
+    *,
+    db_path: str | None = None,
+) -> sqlite3.Row | None:
+    """
+    Execute a read query and return at most one row.
+    """
+    with get_connection(db_path) as connection:
+        return connection.execute(sql, parameters).fetchone()
+
+
+def fetch_all(
+    sql: str,
+    parameters: SqlParameters = (),
+    *,
+    db_path: str | None = None,
+) -> list[sqlite3.Row]:
+    """
+    Execute a read query and return all matching rows.
+    """
+    with get_connection(db_path) as connection:
+        return connection.execute(sql, parameters).fetchall()
 
 
 def utc_now():
